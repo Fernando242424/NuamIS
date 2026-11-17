@@ -65,3 +65,25 @@ pre{white-space:pre-wrap;background:#f6f7f9;padding:10px;border-radius:7px;font-
 
 .fac.hide tr.ext{display:none}
 details.card summary{cursor:pointer}
+
+/* ---- página de inicio ---- */
+.lp{max-width:1080px;margin:0 auto;padding:0 20px 40px}
+.lp-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;flex-wrap:wrap}
+.lp-top .brand{padding:0;color:var(--tx)}.lp-top nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lp-top nav button{background:none;border:0;padding:8px 10px;color:var(--tx);font:inherit;cursor:pointer;border-radius:8px}.lp-top nav button:hover{background:#e9ebf1}.lp-top nav .pri{color:#fff;background:var(--acc)}.lp-top nav .pri:hover{background:var(--acc2)}
+.lp-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding:36px 0 28px}
+.lp-hero h1{font-size:38px;line-height:1.1;letter-spacing:-1px;margin:6px 0 12px}.lp-kicker{color:var(--acc2);font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:1px;margin:0}
+.lp-lead{font-size:17px;color:var(--mut);margin:0 0 18px}.lp-art{width:100%;height:auto}
+.lp-sec{padding:26px 0}.lp-sec h2{font-size:24px;margin-bottom:10px}.lp-sec p{max-width:760px;font-size:15px}
+.lp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.lp-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px}.lp-card h3{margin:8px 0 6px;font-size:16px}.lp-card p{margin:0;color:var(--mut);font-size:14px}
+.lp-ico{width:38px;height:38px;border-radius:10px;background:#fdece8;color:var(--acc2);display:grid;place-items:center;font-size:20px}
+.lp-dark{background:var(--side);color:#e4e7f2;border-radius:16px;padding:28px}.lp-dark h2{color:#fff}.lp-dark li{margin:6px 0}
+.lp-ft{text-align:center;color:var(--mut);font-size:12px;padding-top:24px;border-top:1px solid var(--bd);margin-top:20px}
+@media(max-width:760px){.lp-hero{grid-template-columns:1fr}.lp-hero h1{font-size:30px}}
+
+/* ---- validación de campos (colores + mensajes) ---- */
+input.bad,select.bad,textarea.bad{border-color:var(--err)!important;background:#fff6f5;box-shadow:0 0 0 3px rgba(209,50,47,.12)}
+.fm{display:block;color:var(--err);font-size:12px;margin-top:3px}
+input:user-invalid,select:user-invalid,textarea:user-invalid{border-color:var(--err);background:#fff6f5}
+input:user-valid:not([type=checkbox]):not([type=file]),select:user-valid{border-color:var(--ok)}

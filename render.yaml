@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: nuam-ingenieria
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NUAM_DB_URL        # jdbc:postgresql://HOST/BASE?sslmode=require  (de Neon)
+        sync: false
+      - key: NUAM_DB_USER
+        sync: false
+      - key: NUAM_DB_PASS
+        sync: false
+      - key: NUAM_BACKUP_KEY
+        generateValue: true
+      - key: NUAM_DEMO
+        value: "1"

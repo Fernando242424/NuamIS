@@ -14,7 +14,12 @@ const NAV = {
 
 function toast(t) { const d = document.createElement('div'); d.textContent = t; $('#toast').append(d); setTimeout(() => d.remove(), 4500); }
 const msg = (cls, t) => `<div class="msg ${cls}">${esc(t)}</div>`;
-const fmt = v => v == null ? '' : String(v).replace('T', ' ').slice(0, 19);
+// Fechas con zona horaria (…Z o …-03:00) se muestran en la hora local del navegador; las fechas simples se dejan tal cual.
+const fmt = v => {
+  if (v == null) return ''; const t = String(v);
+  if (/^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}(:?\d{2})?)$/.test(t)) { const d = new Date(t); if (!isNaN(d)) return d.toLocaleString('sv-SE'); }
+  return t.replace('T', ' ').slice(0, 19);
+};
 const fnum = v => v == null ? '' : Number(v).toLocaleString('es-CL', { maximumFractionDigits: 10 });
 
 async function api(method, url, body, raw) {
@@ -32,7 +37,60 @@ async function api(method, url, body, raw) {
   }
   return d;
 }
-const fail = (box, e) => { if (e.stale) return; if (box) box.innerHTML = msg('err', e.message); else toast(e.message); };
+const fail = (box, e) => { if (e.stale) return; if (box) box.innerHTML = msg('err', e.message); else toast(e.message); marcar(e); };
+/* Validación visible en el campo: borde rojo + mensaje bajo el campo (el servidor indica «campo»). */
+function marcar(e) {
+  document.querySelectorAll('.bad').forEach(x => x.classList.remove('bad')); document.querySelectorAll('.fm').forEach(x => x.remove());
+  const c = e && e.data && e.data.campo; if (!c) return;
+  const el = document.querySelector(`[name="${CSS.escape(c)}"]`); if (!el) return;
+  el.classList.add('bad'); const m = document.createElement('small'); m.className = 'fm'; m.setAttribute('role', 'alert'); m.textContent = e.message;
+  el.insertAdjacentElement('afterend', m); el.focus();
+  el.addEventListener('input', () => { el.classList.remove('bad'); m.remove(); }, { once: true });
+}
+
+/* ------------------------------------------------------------------ página de inicio (pública) */
+// Datos de contacto del equipo: edítelos aquí.
+const CONTACTO = { correo: 'contacto@nuam.cl', equipo: ['Fernando', 'Abel', 'Joako'], curso: 'INACAP · Ingeniería de Software (TI3043)' };
+function inicio() {
+  clearInterval(S.timer); S.user = null; S.csrf = null;
+  const ir = id => () => document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const tarjeta = (ico, t, d) => `<div class="lp-card"><div class="lp-ico" aria-hidden="true">${ico}</div><h3>${t}</h3><p>${d}</p></div>`;
+  $('#app').innerHTML = `<div class="lp">
+  <header class="lp-top"><div class="brand">nuam<b>.</b></div>
+    <nav aria-label="Principal"><button data-go="lp-que">Qué es</button><button data-go="lp-func">Funciones</button><button data-go="lp-seg">Seguridad</button><button data-go="lp-cont">Contacto</button><button class="pri" id="lp-in">Ingresar</button></nav></header>
+  <section class="lp-hero"><div><p class="lp-kicker">Prototipo · Ingeniería de Software</p>
+    <h1>Calificaciones tributarias, sin planillas ni errores</h1>
+    <p class="lp-lead">nuam centraliza el ingreso, la validación y la declaración de las calificaciones tributarias de dividendos de Chile, Perú y Colombia, con control de acceso y trazabilidad completa.</p>
+    <div class="row"><button class="pri" id="lp-in2">Ingresar al sistema</button><button data-go="lp-func">Ver funciones</button></div></div>
+    <svg viewBox="0 0 360 260" role="img" aria-label="Ilustración de un panel con gráficos y una calificación aprobada" class="lp-art">
+      <rect x="10" y="20" width="340" height="220" rx="16" fill="#fff" stroke="#dfe2ea"/><rect x="10" y="20" width="340" height="38" rx="16" fill="#1c1f2b"/><circle cx="34" cy="39" r="6" fill="#e8452c"/><circle cx="54" cy="39" r="6" fill="#d68a00"/><circle cx="74" cy="39" r="6" fill="#1f9d57"/>
+      <rect x="30" y="80" width="90" height="60" rx="8" fill="#f4f5f8"/><rect x="135" y="80" width="90" height="60" rx="8" fill="#f4f5f8"/><rect x="240" y="80" width="90" height="60" rx="8" fill="#f4f5f8"/>
+      <text x="42" y="118" font-size="26" font-weight="700" fill="#1d2130">120</text><text x="147" y="118" font-size="26" font-weight="700" fill="#d68a00">14</text><text x="252" y="118" font-size="26" font-weight="700" fill="#1f9d57">98%</text>
+      <rect x="30" y="165" width="22" height="55" rx="4" fill="#e8452c"/><rect x="64" y="150" width="22" height="70" rx="4" fill="#e8452c" opacity=".8"/><rect x="98" y="175" width="22" height="45" rx="4" fill="#e8452c" opacity=".6"/><rect x="132" y="150" width="22" height="70" rx="4" fill="#e8452c"/>
+      <rect x="190" y="165" width="140" height="12" rx="6" fill="#dfe2ea"/><rect x="190" y="165" width="118" height="12" rx="6" fill="#1f9d57"/><rect x="190" y="190" width="140" height="12" rx="6" fill="#dfe2ea"/><rect x="190" y="190" width="80" height="12" rx="6" fill="#d68a00"/></svg></section>
+  <section id="lp-que" class="lp-sec"><h2>El problema que resolvemos</h2>
+    <p>Las corredoras calculan las calificaciones tributarias de los dividendos en planillas sueltas, con 29 factores por instrumento, plazos de declaración jurada y reglas distintas por país. Eso genera errores de cálculo, duplicados, versiones que nadie puede reconstruir y atrasos frente al SII.</p>
+    <p><b>nuam</b> es una <b>aplicación web (SaaS)</b> que reemplaza esas planillas: valida cada calificación al ingresarla, controla los períodos y deja un registro inalterable de quién hizo qué.</p></section>
+  <section id="lp-func" class="lp-sec"><h2>Funciones principales</h2><div class="lp-grid">
+    ${tarjeta('▦', 'Mantenedor de calificaciones', 'Ingresar, consultar, editar y eliminar con confirmación. Filtros por país, origen y período, y validación de la suma de factores 8 al 19.')}
+    ${tarjeta('⇪', 'Carga masiva', 'Cargas desde CSV o Excel con validación previa de la estructura y detalle de las filas rechazadas.')}
+    ${tarjeta('✎', 'Declaraciones juradas 1948 y 1922', 'Cada calificación indica su declaración jurada. Seguimiento de períodos, vencimientos y aprobación.')}
+    ${tarjeta('▥', 'Panel de avance', 'Dashboard con ingresadas, pendientes, aprobadas y errores por período y país.')}
+    ${tarjeta('⇩', 'Exportación y API', 'Exportación a Excel y PDF, y API de solo lectura con tokens para sistemas externos.')}
+    ${tarjeta('☰', 'Usuarios y roles', 'Administrador, corredor, supervisor y auditor, cada uno con lo que le corresponde.')}</div></section>
+  <section id="lp-seg" class="lp-sec lp-dark"><h2>Seguridad de la información (Ley 21.459)</h2>
+    <p>El sistema incorpora medidas para proteger la confidencialidad, integridad y disponibilidad de los datos, en línea con la ley chilena de delitos informáticos:</p>
+    <ul><li><b>Control de acceso:</b> roles, verificación en dos pasos (2FA) y bloqueo tras intentos fallidos.</li>
+    <li><b>Cifrado:</b> conexión HTTPS (TLS), contraseñas con hash y respaldos cifrados con AES-256.</li>
+    <li><b>Trazabilidad:</b> registro de auditoría inmutable con hash encadenado y verificación de integridad.</li>
+    <li><b>Validaciones:</b> de todos los datos ingresados, con mensajes claros, y cierre de sesión por inactividad.</li></ul></section>
+  <section id="lp-cont" class="lp-sec"><h2>Contacto</h2>
+    <p>Proyecto desarrollado por <b>${CONTACTO.equipo.map(esc).join(', ')}</b>.</p>
+    <p>${esc(CONTACTO.curso)}<br>Correo: <a href="mailto:${esc(CONTACTO.correo)}">${esc(CONTACTO.correo)}</a></p></section>
+  <footer class="lp-ft">nuam · Mantenedor de Calificaciones Tributarias · Prototipo académico</footer></div>`;
+  $$('[data-go]').forEach(b => b.onclick = ir(b.dataset.go));
+  $('#lp-in').onclick = $('#lp-in2').onclick = () => showLogin();
+}
 
 /* ------------------------------------------------------------------ acceso */
 function showLogin(aviso) {
@@ -355,7 +413,7 @@ async function dashboard(_, q) {
   const pintar = async () => {
     const per = $('#dp') ? $('#dp').value : (q.periodo || ''), d = await api('GET', '/api/v1/dashboard' + (per ? '?periodo=' + encodeURIComponent(per) : ''));
     const pct = d.total ? Math.round(100 * (d.total - d.pendientes) / d.total) : 0;
-    $('#view').innerHTML = `<div class="row" style="margin-bottom:12px"><label>Periodo comercial<select id="dp">${opts((d.periodos.length ? d.periodos : [d.periodo]).map(x => [x, x]), d.periodo)}</select></label><span class="sub">Actualizado ${esc(d.actualizado)}</span></div>
+    $('#view').innerHTML = `<div class="row" style="margin-bottom:12px"><label>Periodo comercial<select id="dp">${opts((d.periodos.length ? d.periodos : [d.periodo]).map(x => [x, x]), d.periodo)}</select></label><span class="sub">Actualizado ${esc(fmt(d.actualizado))}</span></div>
     ${d.vacio ? '<div class="card empty">No hay calificaciones registradas en este periodo comercial.</div>' : `<div class="cards"><div class="kpi"><b>${d.total}</b><span>Ingresadas</span></div><div class="kpi pend"><b>${d.pendientes}</b><span>Pendientes</span></div><div class="kpi ok"><b>${d.completas}</b><span>Completas</span></div><div class="kpi ok"><b>${d.aprobadas}</b><span>Aprobadas</span></div><div class="kpi err"><b>${d.errores.total}</b><span>Con errores de validación</span></div></div>
     <div class="card"><h2>Avance del periodo ${esc(d.periodo)}: ${pct}%</h2><div class="bar"><i style="width:${pct}%"></i></div></div>
     <div class="card"><h2>Por país</h2><table><tbody>${d.porMercado.map(m => `<tr><td>${esc(m.pais)}</td><td class="num">${m.total}</td></tr>`).join('')}</tbody></table></div>`}`;
@@ -459,5 +517,5 @@ function definirPassword(token) {
 (async () => {
   const m = location.hash.match(/^#definir\?token=([\w-]+)/);
   if (m) return definirPassword(m[1]);
-  try { entrar(await api('GET', '/auth/me')); } catch (e) { showLogin(); }
+  try { entrar(await api('GET', '/auth/me')); } catch (e) { if (e.status === 503) return; inicio(); }
 })();

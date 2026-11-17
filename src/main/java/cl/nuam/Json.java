@@ -20,7 +20,7 @@ public final class Json {
         else if (o instanceof Boolean || o instanceof Integer || o instanceof Long) sb.append(o);
         else if (o instanceof BigDecimal b) sb.append(b.toPlainString());
         else if (o instanceof Number n) sb.append(n);
-        else if (o instanceof Timestamp t) str(sb, t.toLocalDateTime().format(TS));
+        else if (o instanceof Timestamp t) str(sb, t.toInstant().truncatedTo(java.time.temporal.ChronoUnit.SECONDS).toString());   // instante UTC (…Z): la pantalla lo muestra en la hora local
         else if (o instanceof java.time.temporal.TemporalAccessor || o instanceof java.sql.Date) str(sb, o.toString());
         else if (o instanceof Map<?, ?> m) {
             sb.append('{'); boolean f = true;

@@ -16,6 +16,8 @@ public final class Backup {
     private static ProcessBuilder pb(List<String> cmd) {
         ProcessBuilder b = new ProcessBuilder(cmd).redirectErrorStream(true);
         b.environment().put("PGPASSWORD", Config.DB_PASS);
+        var mm = java.util.regex.Pattern.compile("[?&]sslmode=(\\w[\\w-]*)").matcher(Config.DB_URL);   // Neon y otros servicios en la nube exigen SSL
+        if (mm.find()) b.environment().put("PGSSLMODE", mm.group(1));
         return b;
     }
     private static String exec(List<String> cmd) throws Exception {
