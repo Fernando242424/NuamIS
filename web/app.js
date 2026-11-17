@@ -50,7 +50,7 @@ function marcar(e) {
 
 /* ------------------------------------------------------------------ página de inicio (pública) */
 // Datos de contacto del equipo: edítelos aquí.
-const CONTACTO = { correo: 'contacto@nuam.cl', equipo: ['Fernando', 'Abel', 'Joako'], curso: 'INACAP · Ingeniería de Software (TI3043)' };
+const CONTACTO = { correo: 'contacto@nuam.cl', equipo: ['Fernando Ramirez', 'Abel Navarro', 'Joaquin Rodriguez', 'Nicolas Jofre']};
 function inicio() {
   clearInterval(S.timer); S.user = null; S.csrf = null;
   const ir = id => () => document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
