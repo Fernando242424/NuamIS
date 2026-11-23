@@ -7,7 +7,7 @@ RUN mkdir out && javac -encoding UTF-8 -d out -cp lib/postgresql.jar src/main/ja
 
 FROM eclipse-temurin:21-jre
 # Versión del cliente: igual (o mayor) que la de PostgreSQL en Neon (se ve en el panel del proyecto).
-ARG PGV=17
+ARG PGV=18
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates lsb-release \
  && install -d /usr/share/postgresql-common/pgdg \
  && curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
